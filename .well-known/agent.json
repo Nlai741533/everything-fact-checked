@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1",
+  "name": "EFC (Everything Fact-Checked)",
+  "description": "Fact-checking tool for AI-generated research reports. Catches 5 systematic failure modes: unit errors, fabricated interpolation, source conflation, stale data, and attribution laundering.",
+  "url": "https://github.com/Nlai741533/EFC-Plugin",
+  "provider": {
+    "organization": "Nlai741533"
+  },
+  "version": "0.2.2",
+  "documentation_url": "https://github.com/Nlai741533/EFC-Plugin#readme",
+  "license": "MIT",
+  "capabilities": {
+    "skills": [
+      {
+        "id": "fact-check",
+        "name": "Fact-Check Reports",
+        "description": "Systematically fact-check AI-generated research reports against primary sources.",
+        "tags": ["fact-checking", "verification", "hallucination-detection", "research", "data-quality"]
+      },
+      {
+        "id": "extract-claims",
+        "name": "Extract Verifiable Claims",
+        "description": "Inventory every specific, checkable claim from a document with priority triage (P0-P3).",
+        "tags": ["claim-extraction", "triage", "nlp"]
+      },
+      {
+        "id": "check-links",
+        "name": "Check Source Links",
+        "description": "Verify that every source URL in a report actually resolves and categorize the result.",
+        "tags": ["link-checking", "url-validation", "source-audit"]
+      },
+      {
+        "id": "verify-sources",
+        "name": "Verify Source Content",
+        "description": "Fetch cited URLs, extract text, and check whether the claimed figure or key terms actually appear in the source.",
+        "tags": ["source-verification", "content-check", "citation-audit"]
+      },
+      {
+        "id": "audit",
+        "name": "Full Report Audit",
+        "description": "End-to-end audit: claim extraction + link checking + source verification + reliability verdict.",
+        "tags": ["audit", "report-quality", "reliability"]
+      }
+    ],
+    "protocols": ["https"]
+  },
+  "interfaces": [
+    {
+      "type": "cli",
+      "name": "efc",
+      "description": "CLI tool — pip install everything-fact-checked",
+      "install": "pip install everything-fact-checked",
+      "repository": "https://github.com/Nlai741533/EFC-Plugin"
+    },
+    {
+      "type": "skill",
+      "name": "fact-check",
+      "description": "Agent-agnostic SKILL.md — one file, zero dependencies, works with any AI agent",
+      "repository": "https://github.com/Nlai741533/EFC-standalone"
+    },
+    {
+      "type": "github-action",
+      "name": "EFC-Plugin",
+      "description": "GitHub Action for automated fact-checking in PRs",
+      "repository": "https://github.com/Nlai741533/EFC-Plugin"
+    }
+  ],
+  "tags": [
+    "fact-checking",
+    "hallucination",
+    "ai-safety",
+    "research",
+    "verification",
+    "data-quality",
+    "llm",
+    "agent-tool"
+  ]
+}
