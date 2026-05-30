@@ -57,6 +57,25 @@ class RuleTest(unittest.TestCase):
         rec["source_url"] = None
         self.assertTrue(any("source_url" in e for e in errs(rec)))
 
+    def test_verified_rejects_non_url_source(self):
+        rec = copy.deepcopy(VALID)
+        rec["source_url"] = "not a url"
+        errs_list = errs(rec)
+        self.assertTrue(
+            any("does not look like a URL" in e for e in errs_list),
+            f"Expected URL-format error, got: {errs_list}",
+        )
+
+    def test_verified_accepts_valid_http_url(self):
+        rec = copy.deepcopy(VALID)
+        rec["source_url"] = "http://sec.gov/filing"
+        self.assertNotIn("does not look like a URL", " ".join(errs(rec)))
+
+    def test_verified_accepts_valid_https_url(self):
+        rec = copy.deepcopy(VALID)
+        rec["source_url"] = "https://example.com/path?q=1#frag"
+        self.assertEqual(errs(rec), [])
+
     def test_verified_p0_requires_primary_or_secondary(self):
         rec = copy.deepcopy(VALID)
         rec["source_tier"] = "tertiary"

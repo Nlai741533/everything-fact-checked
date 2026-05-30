@@ -65,7 +65,7 @@
   "factCheckRules": {
     "description": "Cross-field rules enforced by validate_evidence.py beyond plain JSON Schema.",
     "rules": [
-      "A 'verified' verdict requires a non-null source_url.",
+      "A 'verified' verdict requires a non-null source_url that looks like an http/https URL (format check; reachability is not validated).",
       "A 'verified' verdict on a P0 or P1 claim requires source_tier of 'primary' or 'secondary' (never 'tertiary' alone).",
       "An 'error' verdict requires both reported_value and source_value.",
       "An 'unverifiable' verdict requires a non-empty notes field explaining what was searched."

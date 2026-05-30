@@ -25,6 +25,14 @@ DEFAULT_SCHEMA = os.path.join(
     os.path.dirname(__file__), "..", "schemas", "evidence.schema.json"
 )
 
+_URL_RE = re.compile(r"^https?://\S+$", re.IGNORECASE)
+
+
+def _looks_like_url(value: str) -> bool:
+    """Conservative URL plausibility check (http/https scheme + non-empty host)."""
+    return bool(_URL_RE.match(value.strip()))
+
+
 _JSON_TYPES = {
     "string": str,
     "number": (int, float),
@@ -89,8 +97,13 @@ def _check_rules(rec: dict, cid: str) -> list:
     verdict = rec.get("verdict")
 
     if verdict == "verified":
-        if not rec.get("source_url"):
+        url = rec.get("source_url")
+        if not url:
             errors.append(f"{cid}: 'verified' requires a non-null source_url")
+        elif not _looks_like_url(url):
+            errors.append(
+                f"{cid}: 'verified' source_url does not look like a URL: {url!r}"
+            )
         if rec.get("priority") in ("P0", "P1") and rec.get("source_tier") not in ("primary", "secondary"):
             errors.append(
                 f"{cid}: 'verified' P0/P1 claim requires source_tier 'primary' or 'secondary'"

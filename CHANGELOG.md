@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.1] - 2026-05-30
+
+### Fixed
+- **Security:** Removed embedded GitHub token from git remote URL. Token must be
+  revoked in GitHub → Settings → Developer settings → Personal access tokens.
+- **Validation:** `validate_evidence.py` now rejects `source_url` values that are
+  not valid http/https URLs (e.g. `"not a url"` no longer passes). Added
+  `_looks_like_url()` helper with 3 new tests.
+- **Docs:** README evidence-format description now accurately reflects what the
+  validator checks (URL format, not reachability).
+- **Docs:** `FACTCHECK.md` refreshed — test count updated from stale "16" to 47,
+  URL-validation doc/code mismatch logged as a found-and-fixed error.
+- **Housekeeping:** Added `feedback-log.md` to `.gitignore` (private repo-management
+  notes, not for publication).
+
 ## [0.1.0] - 2026-05-30
 
 ### Added

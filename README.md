@@ -111,7 +111,7 @@ python3 scripts/check_links.py report.md --no-network   # list URLs only
 python3 scripts/validate_evidence.py evidence.json
 ```
 
-Every verdict can be recorded in a machine-checkable [evidence format](schemas/evidence.schema.json); `validate_evidence.py` enforces the schema *and* the cross-field rules (e.g. a `verified` verdict must cite a resolving primary/secondary source). See [`examples/evidence-sample.json`](examples/evidence-sample.json).
+Every verdict can be recorded in a machine-checkable [evidence format](schemas/evidence.schema.json); `validate_evidence.py` enforces the schema *and* the cross-field rules (e.g. a `verified` verdict must cite a well-formed http/https URL and, for P0/P1 claims, a primary or secondary source). See [`examples/evidence-sample.json`](examples/evidence-sample.json).
 
 ## 🛠️ Build on it
 
