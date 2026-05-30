@@ -6,11 +6,11 @@ import sys
 import unittest
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-sys.path.insert(0, os.path.join(ROOT, "scripts"))
+sys.path.insert(0, os.path.join(ROOT, "src"))
 
-import extract_claims as ec  # noqa: E402
-import check_links as cl  # noqa: E402
-import validate_evidence as ve  # noqa: E402
+from efc import _extract_claims as ec  # noqa: E402
+from efc import _check_links as cl  # noqa: E402
+from efc import _validate_evidence as ve  # noqa: E402
 
 SAMPLE = os.path.join(ROOT, "examples", "sample-report.md")
 EVIDENCE = os.path.join(ROOT, "examples", "evidence-sample.json")

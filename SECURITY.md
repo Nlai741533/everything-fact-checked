@@ -5,7 +5,7 @@
 If you find a security vulnerability in this project, please report it **privately**:
 
 - Open a GitHub Security Advisory: **Security → Report a vulnerability**
-- Or email: nlai741533@gmail.com with the subject `[security] everything-fact-checked`
+- Or email: nlai741533@gmail.com with the subject `[security] EFC-Plugin`
 
 Please **do not** open a public issue for security-related findings.
 
@@ -28,6 +28,6 @@ If you accidentally commit a secret:
 
 ## Scope
 
-This policy covers the `everything-fact-checked` repository. It does not cover:
+This policy covers the EFC-Plugin repository. It does not cover:
 - Third-party tools or dependencies (report to their maintainers)
 - The user's own environment or credentials

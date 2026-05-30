@@ -1,10 +1,10 @@
 [build-system]
 requires = ["hatchling"]
-build-backend = "hatchling.backends"
+build-backend = "hatchling.build"
 
 [project]
 name = "everything-fact-checked"
-version = "0.2.0"
+version = "0.2.1"
 description = "Fact-check AI-generated research reports — catch hallucinated numbers, fabricated data, and exaggerated claims"
 readme = "README.md"
 license = "MIT"
@@ -29,8 +29,9 @@ classifiers = [
 efc = "efc.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Nlai741533/everything-fact-checked"
-Repository = "https://github.com/Nlai741533/everything-fact-checked"
+Homepage = "https://github.com/Nlai741533/EFC-Plugin"
+Repository = "https://github.com/Nlai741533/EFC-Plugin"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/efc"]
+artifacts = ["src/efc/schemas/*.json"]

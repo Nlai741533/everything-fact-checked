@@ -48,22 +48,31 @@ jobs:
       - name: Run unit tests
         run: PYTHONPATH=src:$PYTHONPATH python3 -m unittest discover -s tests -v
 
-      - name: Validate the evidence sample against the schema
-        run: python3 scripts/validate_evidence.py examples/evidence-sample.json
-
-      - name: Smoke-test scripts on the example report
-        run: |
-          python3 scripts/extract_claims.py examples/sample-report.md > /dev/null && echo "extract_claims OK"
-          python3 scripts/check_links.py --no-network examples/sample-report.md > /dev/null && echo "check_links OK"
-          python3 scripts/verify_source.py --json examples/evidence-sample.json > /dev/null 2>&1 && echo "verify_source OK" || echo "verify_source (network-dependent, OK to fail in CI)"
-
-      - name: Smoke-test CLI
+      - name: Smoke-test CLI (dev mode)
         run: |
           PYTHONPATH=src:$PYTHONPATH python3 -m efc.cli version
           PYTHONPATH=src:$PYTHONPATH python3 -m efc.cli extract examples/sample-report.md > /dev/null
           PYTHONPATH=src:$PYTHONPATH python3 -m efc.cli links --no-network examples/sample-report.md > /dev/null
           PYTHONPATH=src:$PYTHONPATH python3 -m efc.cli evidence examples/evidence-sample.json > /dev/null
           PYTHONPATH=src:$PYTHONPATH python3 -m efc.cli audit --no-network examples/sample-report.md > /dev/null
+
+  install-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build and install
+        run: |
+          pip install .
+          efc version
+          efc extract examples/sample-report.md > /dev/null
+          efc evidence examples/evidence-sample.json
+          efc audit --no-network examples/sample-report.md > /dev/null
 
   plugin-validate:
     runs-on: ubuntu-latest
@@ -89,14 +98,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check version alignment across manifests
+      - name: Check version alignment across all locations
         run: |
           PV=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
           MV=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
-          echo "plugin.json version: $PV"
-          echo "marketplace.json version: $MV"
-          if [ "$PV" != "$MV" ]; then
-            echo "ERROR: plugin.json ($PV) and marketplace.json ($MV) versions differ!"
+          TV=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          IV=$(python3 -c "import re; print(re.search(r'__version__\s*=\s*[\"']([^\"']+)', open('src/efc/__init__.py').read()).group(1))")
+          echo "plugin.json:      $PV"
+          echo "marketplace.json: $MV"
+          echo "pyproject.toml:   $TV"
+          echo "__init__.py:      $IV"
+          if [ "$PV" != "$MV" ] || [ "$PV" != "$TV" ] || [ "$PV" != "$IV" ]; then
+            echo "ERROR: versions differ!"
             exit 1
           fi
 
@@ -123,4 +136,6 @@ jobs:
           python-version: "3.11"
 
       - name: Check live links
-        run: python3 scripts/check_links.py --timeout 10 examples/sample-report.md
+        run: |
+          pip install .
+          efc links --timeout 10 examples/sample-report.md

@@ -4,9 +4,9 @@ import os
 import sys
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import validate_evidence as ve  # noqa: E402
+from efc import _validate_evidence as ve  # noqa: E402
 
 SCHEMA = ve.load_schema()
 

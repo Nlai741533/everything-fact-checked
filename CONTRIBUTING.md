@@ -1,12 +1,12 @@
-# Contributing to everything-fact-checked
+# Contributing to EFC-Plugin
 
 Thanks for your interest! This project is small and intentionally simple — stdlib Python, Markdown skills, JSON schemas. We welcome PRs that keep it that way.
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/Nlai741533/everything-fact-checked
-cd everything-fact-checked
+git clone https://github.com/Nlai741533/EFC-Plugin
+cd EFC-Plugin
 
 # Install pre-commit hooks (catches secrets + file hygiene)
 pre-commit install

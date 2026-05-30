@@ -1,10 +1,10 @@
-# everything-fact-checked
+# EFC-Plugin
 
 **Your AI wrote a confident report. Is it actually *true*?**
 
-`everything-fact-checked` is a Claude Code plugin that turns your agent into a rigorous fact-checker — catching hallucinated numbers, fabricated data points, and exaggerated claims *before* they reach your reader.
+`EFC-Plugin` is a Claude Code plugin that turns your agent into a rigorous fact-checker — catching hallucinated numbers, fabricated data points, and exaggerated claims *before* they reach your reader.
 
-[![CI](https://github.com/Nlai741533/everything-fact-checked/actions/workflows/ci.yml/badge.svg)](https://github.com/Nlai741533/everything-fact-checked/actions/workflows/ci.yml)
+[![CI](https://github.com/Nlai741533/EFC-Plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/Nlai741533/EFC-Plugin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > 🪞 This repo eats its own dog food: it is fact-checked against itself before every release. See [`FACTCHECK.md`](FACTCHECK.md).
@@ -52,15 +52,15 @@ Try it yourself: [`examples/sample-report.md`](examples/sample-report.md) is a d
 It's a standard Claude Code plugin — two lines to install:
 
 ```
-/plugin marketplace add Nlai741533/everything-fact-checked
+/plugin marketplace add Nlai741533/EFC-Plugin
 /plugin install fact-check@everything-fact-checked
 ```
 
 Or kick the tires for a single session, no install:
 
 ```bash
-git clone https://github.com/Nlai741533/everything-fact-checked
-claude --plugin-dir ./everything-fact-checked
+git clone https://github.com/Nlai741533/EFC-Plugin
+claude --plugin-dir ./EFC-Plugin
 ```
 
 > Verified against Claude Code 2.1.143. There is no `claude skill add` command —
@@ -91,38 +91,71 @@ It also treats all source content as **untrusted data, not instructions** — so
 ### What it is (and isn't)
 
 - ✅ **A disciplined operating procedure** — triage, primary-source preference, chart/table tracing, marketing-claim labeling, a standard evidence format.
-- ✅ **Helper scripts** that extract claims and check links so nothing goes unreviewed.
-- ❌ **Not a push-button oracle.** Deciding whether a source *truly* supports a claim is a judgment call — the agent still opens the primary sources. The scripts tell you *what to check*, not *whether it's true*.
+- ✅ **A CLI (`efc`)** for local use and CI — claim extraction, link checking, evidence validation, source-content verification, and full audit.
+- ✅ **A GitHub Action** that auto-checks markdown reports in PRs.
+- ❌ **Not a push-button oracle.** Deciding whether a source *truly* supports a claim is a judgment call — the agent still opens the primary sources. The tools tell you *what to check*, not *whether it's true*.
 
-## Helper scripts
+## CLI (`efc`)
 
-No third-party dependencies — standard library only. Tested on Python 3.11 (CI) and 3.12.
+Install and use:
 
 ```bash
-# Inventory every checkable claim with a priority guess
-python3 scripts/extract_claims.py report.md
-python3 scripts/extract_claims.py report.md --json
+pip install .
+# or: pipx install .
 
-# Check that every source URL actually resolves (GET fallback + categories)
-python3 scripts/check_links.py report.md
-python3 scripts/check_links.py report.md --no-network   # list URLs only
-
-# Validate evidence records against the standard schema
-python3 scripts/validate_evidence.py evidence.json
+efc version                                    # show version
+efc extract report.md                          # inventory claims
+efc extract report.md --json                   # JSON output
+efc links report.md                            # check source URLs
+efc links --no-network report.md               # list URLs only
+efc evidence evidence.json                     # validate evidence records
+efc verify evidence.json                       # verify source content matches claims
+efc audit --no-network report.md               # full audit (claims + links + summary)
+efc audit --json report.md                     # machine-readable audit for CI
 ```
 
-Every verdict can be recorded in a machine-checkable [evidence format](schemas/evidence.schema.json); `validate_evidence.py` enforces the schema *and* the cross-field rules (e.g. a `verified` verdict must cite a well-formed http/https URL and, for P0/P1 claims, a primary or secondary source). See [`examples/evidence-sample.json`](examples/evidence-sample.json).
+Exit codes: `0` = clean, `1` = problems found, `2` = usage/IO error.
+
+No third-party dependencies — standard library only. Tested on Python 3.11–3.13.
+
+The original `scripts/*.py` files still work for direct use, but `efc` is the recommended interface.
+
+Every verdict can be recorded in a machine-checkable [evidence format](schemas/evidence.schema.json); `efc evidence` enforces the schema *and* the cross-field rules (e.g. a `verified` verdict must cite a well-formed http/https URL and, for P0/P1 claims, a primary or secondary source). See [`examples/evidence-sample.json`](examples/evidence-sample.json).
+
+## Source-content verification
+
+`efc verify` goes beyond link-checking: it fetches cited URLs, extracts visible text, and checks whether the claimed figure or key terms actually appear in the source.
+
+```bash
+efc verify evidence.json                       # verify all records
+efc verify --claim C001 evidence.json          # verify one claim
+efc verify --json evidence.json                # JSON output
+```
+
+Verdicts: `found` ✅ | `not_found` ❌ | `ambiguous` ⚠️ | `skipped` ⏭️ | `fetch_failed` 🔌
+
+## GitHub Action
+
+Fact-check markdown reports automatically in PRs:
+
+```yaml
+- uses: Nlai741533/EFC-Plugin@v0.2.1
+  with:
+    check-links: 'true'
+    fail-on-broken-links: 'true'
+```
+
+The action extracts claims from changed `.md` files, checks source links, and posts results to the PR summary.
 
 ## 🛠️ Build on it
 
-This is designed to be a **foundation, not a finished product** — the skill is plain Markdown and the scripts are tiny, readable, and dependency-free. PRs and forks are very welcome. Some directions that would make it more powerful:
+This is designed to be a **foundation, not a finished product**. PRs and forks are very welcome. Some directions that would make it more powerful:
 
 - **More extractors** — the inventory already covers figures, percentages, dates, and superlatives; add named entities, quotes, and currency-conversion pairs.
-- **Source-content verification** — fetch a cited URL and check it actually contains the attributed figure (the current scripts only confirm the link resolves).
 - **PDF & table parsing** — extract claims straight from filings and spreadsheets.
 - **Exchange-rate sanity checks** — flag conversions made without a stated rate.
 - **Domain packs** — tuned source hierarchies for finance, science, law, medicine, etc.
-- **Editor / CI integrations** — run the audit automatically on every draft or pull request.
+- **Report scoring** — produce a reliability score based on source coverage, P0/P1 verification rate, and broken link rate.
 
 New to the repo? Good first issues: add a new claim type to `extract_claims.py` (with a test), or add a fixture for a failure mode that isn't covered yet.
 

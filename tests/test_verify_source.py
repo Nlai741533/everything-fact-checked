@@ -3,9 +3,9 @@ import os
 import sys
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import verify_source as vs  # noqa: E402
+from efc import _verify_source as vs  # noqa: E402
 
 
 class TextExtractionTest(unittest.TestCase):

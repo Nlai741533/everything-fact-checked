@@ -21,15 +21,19 @@ import json
 import os
 import sys
 
-# Add the scripts directory to the path so we can import the existing modules.
-_SCRIPTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "scripts")
-sys.path.insert(0, os.path.abspath(_SCRIPTS_DIR))
+from efc import __version__
+from efc import _extract_claims as extract_claims
+from efc import _check_links as check_links
+from efc import _validate_evidence as ve
+from efc import _verify_source as vs
 
-from efc.__init__ import __version__  # noqa: E402
-import extract_claims  # noqa: E402
-import check_links  # noqa: E402
-import validate_evidence as ve  # noqa: E402
-import verify_source as vs  # noqa: E402
+
+# ── helpers ──────────────────────────────────────────────────────────
+
+def _default_schema_path() -> str:
+    """Find evidence.schema.json relative to this package (works installed or dev)."""
+    pkg_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(pkg_dir, "schemas", "evidence.schema.json")
 
 
 # ── extract ──────────────────────────────────────────────────────────
@@ -86,9 +90,7 @@ def _cmd_links(args) -> int:
 # ── evidence ─────────────────────────────────────────────────────────
 
 def _cmd_evidence(args) -> int:
-    schema_path = args.schema or os.path.join(
-        os.path.dirname(__file__), "..", "..", "schemas", "evidence.schema.json"
-    )
+    schema_path = args.schema or _default_schema_path()
     try:
         schema = ve.load_schema(schema_path)
         with open(args.evidence, encoding="utf-8") as fh:
@@ -117,7 +119,6 @@ def _cmd_evidence(args) -> int:
 def _cmd_audit(args) -> int:
     exit_code = 0
 
-    # Read report
     try:
         with open(args.report, encoding="utf-8") as fh:
             text = fh.read()
@@ -137,6 +138,7 @@ def _cmd_audit(args) -> int:
     urls = check_links.extract_urls(text)
     broken_urls = []
     ok_urls = 0
+    unchecked_urls = 0
     if urls and not args.no_network:
         for url in urls:
             status, cat, note = check_links.check_url(url, timeout=args.timeout)
@@ -145,21 +147,18 @@ def _cmd_audit(args) -> int:
             else:
                 ok_urls += 1
     elif urls:
-        ok_urls = len(urls)
+        unchecked_urls = len(urls)
 
     # JSON mode: pure JSON output
     if args.json:
         result = {
             "report": report_name,
-            "claims": {
-                "total": n_claims,
-                "p0": p0,
-                "p1": p1,
-            },
+            "claims": {"total": n_claims, "p0": p0, "p1": p1},
             "links": {
                 "total": len(urls),
                 "ok": ok_urls,
                 "broken": len(broken_urls),
+                "unchecked": unchecked_urls,
                 "broken_details": [
                     {"url": u, "status": s, "category": c}
                     for u, s, c in broken_urls
@@ -172,7 +171,10 @@ def _cmd_audit(args) -> int:
     # Human-readable mode
     print(f"## Audit: {report_name}")
     print(f"Claims found:   {n_claims} (P0: {p0}, P1: {p1})")
-    print(f"Source URLs:    {ok_urls} ok, {len(broken_urls)} broken")
+    if args.no_network and urls:
+        print(f"Source URLs:    {unchecked_urls} unchecked (--no-network)")
+    else:
+        print(f"Source URLs:    {ok_urls} ok, {len(broken_urls)} broken")
     if broken_urls:
         for url, status, cat in broken_urls:
             code = str(status) if status is not None else "ERR"
@@ -187,9 +189,6 @@ def _cmd_audit(args) -> int:
 # ── verify ────────────────────────────────────────────────────────────
 
 def _cmd_verify(args) -> int:
-    schema_path = os.path.join(
-        os.path.dirname(__file__), "..", "..", "schemas", "evidence.schema.json"
-    )
     try:
         with open(args.evidence, encoding="utf-8") as fh:
             data = json.load(fh)

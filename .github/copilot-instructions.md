@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is `everything-fact-checked`, a Claude Code plugin that fact-checks AI-generated research reports. It is a small, stdlib-only Python project with a Markdown-based skill and JSON schemas.
+This is EFC-Plugin, a Claude Code plugin that fact-checks AI-generated research reports. It is a small, stdlib-only Python project with a Markdown-based skill and JSON schemas.
 
 ## Critical Rules
 

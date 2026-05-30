@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/Nlai741533/EFC-Plugin/schemas/evidence.schema.json",
+  "$id": "https://github.com/Nlai741533/everything-fact-checked/schemas/evidence.schema.json",
   "title": "Fact-check evidence record",
   "description": "One traceable verdict produced by the fact-check skill. A file may contain a single record or an array of records.",
   "type": "object",

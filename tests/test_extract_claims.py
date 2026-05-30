@@ -4,9 +4,9 @@ import os
 import sys
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import extract_claims as ec  # noqa: E402
+from efc import _extract_claims as ec  # noqa: E402
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "mini-report.md")
 

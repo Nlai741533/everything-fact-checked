@@ -1,14 +1,14 @@
 {
   "name": "fact-check",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Systematically fact-check AI-generated research reports against primary sources. Catches the five recurring failure modes of LLM research: unit/scale errors, fabricated interpolation, source conflation, stale data, and attribution laundering.",
   "author": {
     "name": "Nlai741533",
     "email": "nlai741533@gmail.com",
     "url": "https://github.com/Nlai741533"
   },
-  "homepage": "https://github.com/Nlai741533/everything-fact-checked",
-  "repository": "https://github.com/Nlai741533/everything-fact-checked",
+  "homepage": "https://github.com/Nlai741533/EFC-Plugin",
+  "repository": "https://github.com/Nlai741533/EFC-Plugin",
   "license": "MIT",
   "keywords": [
     "fact-check",

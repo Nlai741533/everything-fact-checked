@@ -24,7 +24,7 @@ class VersionTest(unittest.TestCase):
         finally:
             sys.stdout = old
         self.assertEqual(rc, 0)
-        self.assertIn("0.2.0", buf.getvalue())
+        self.assertIn("0.2.1", buf.getvalue())
 
 
 class ExtractTest(unittest.TestCase):
@@ -93,7 +93,7 @@ class AuditTest(unittest.TestCase):
         self.assertEqual(rc, 0)
         data = json.loads(buf.getvalue())
         self.assertEqual(data["claims"]["total"], 18)
-        self.assertTrue(data["links"]["ok"] > 0)
+        self.assertTrue(data["links"]["unchecked"] > 0)
 
 
 class NoCommandTest(unittest.TestCase):

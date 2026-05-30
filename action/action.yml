@@ -16,10 +16,6 @@ inputs:
     description: 'Per-request timeout for link checking (seconds)'
     required: false
     default: '10'
-  fail-on-broken-links:
-    description: 'Fail the action if broken links are found'
-    required: false
-    default: 'true'
   python-version:
     description: 'Python version for running scripts'
     required: false
@@ -37,6 +33,10 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
+    - name: Install efc
+      shell: bash
+      run: pip install ${{ github.action_path }}
+
     - name: Extract claims from reports
       id: extract
       shell: bash
@@ -46,14 +46,13 @@ runs:
         total_claims=0
 
         for file in $(find . -name '*.md' -not -path './.git/*' -not -name 'FACTCHECK.md' -not -name 'CHANGELOG.md' -not -name 'README.md' -not -name 'SECURITY.md' -not -name 'CONTRIBUTING.md' | sort); do
-          echo "Checking: $file"
-          claims=$(python3 scripts/extract_claims.py --json "$file" 2>/dev/null)
+          claims=$(efc extract --json "$file" 2>/dev/null)
           if [ -n "$claims" ]; then
             count=$(echo "$claims" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
             total_claims=$((total_claims + count))
             echo "### \`$file\` — $count claims" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            python3 scripts/extract_claims.py "$file" >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+            efc extract "$file" >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
@@ -70,14 +69,15 @@ runs:
         total_broken=0
 
         for file in $(find . -name '*.md' -not -path './.git/*' -not -name 'FACTCHECK.md' -not -name 'CHANGELOG.md' -not -name 'README.md' | sort); do
-          broken=$(python3 scripts/check_links.py --timeout ${{ inputs.link-timeout }} "$file" 2>/dev/null || true)
-          broken_count=$(echo "$broken" | grep -c '^\[' || echo 0)
+          output=$(efc links --timeout ${{ inputs.link-timeout }} "$file" 2>/dev/null || true)
+          # Count lines that are actual broken link results (not the summary line)
+          broken_count=$(echo "$output" | grep -cE '^\[(not_found|server_error|ssl_error|unreachable|client_error)' || echo 0)
 
           if [ "$broken_count" -gt 0 ]; then
             total_broken=$((total_broken + broken_count))
             echo "### 🔗 Broken links in \`$file\`" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$broken" >> $GITHUB_STEP_SUMMARY
+            echo "$output" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
