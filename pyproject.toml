@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.backends"
+
+[project]
+name = "everything-fact-checked"
+version = "0.2.0"
+description = "Fact-check AI-generated research reports — catch hallucinated numbers, fabricated data, and exaggerated claims"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Nlai741533", email = "nlai741533@gmail.com" },
+]
+keywords = ["fact-check", "verification", "hallucination", "research", "audit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing",
+]
+
+[project.scripts]
+efc = "efc.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Nlai741533/everything-fact-checked"
+Repository = "https://github.com/Nlai741533/everything-fact-checked"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/efc"]

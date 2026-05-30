@@ -2,6 +2,41 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.0] - 2026-05-30
+
+### Added — CLI
+- **`efc` CLI command** with subcommands: `extract`, `links`, `evidence`, `audit`,
+  `verify`, `version`. Installable via `pipx install .` or `pip install .`.
+- `pyproject.toml` for standard Python packaging (hatchling backend).
+- Stable exit codes: 0=success, 1=problems found, 2=usage/IO error.
+- JSON output mode (`--json`) for all subcommands, suitable for CI pipelines.
+
+### Added — Source-content verification
+- `scripts/verify_source.py`: fetches cited URLs, extracts visible text,
+  and checks whether the claimed value/key terms appear in the source.
+  Verdicts: `found`, `not_found`, `ambiguous`, `skipped`, `fetch_failed`.
+- Integrated as `efc verify` subcommand.
+
+### Added — GitHub Action
+- `action/action.yml`: composite action for fact-checking markdown reports
+  in PRs. Extracts claims, checks links, posts results to the PR summary.
+
+### Added — Repo hardening
+- `SECURITY.md`: vulnerability reporting policy and secret scanning overview.
+- `CONTRIBUTING.md`: development workflow, code style, commit conventions.
+- Issue templates: bug report, feature request, new claim type proposal.
+- `.github/copilot-instructions.md`: Copilot coding agent project guidance.
+
+### Added — CI
+- Python matrix testing: 3.11, 3.12, 3.13.
+- CLI smoke test in CI.
+- Source verification smoke test in CI.
+- Scheduled weekly live link check (non-blocking).
+
+### Changed
+- Manifest versions bumped to 0.2.0.
+- `.gitignore` updated to exclude build artifacts.
+
 ## [0.1.2] - 2026-05-30
 
 ### Fixed

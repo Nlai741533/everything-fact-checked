@@ -11,7 +11,7 @@
       "name": "fact-check",
       "source": "./",
       "description": "Systematically fact-check AI-generated research reports against primary sources.",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "skills": ["./skills/fact-check"],
       "category": "research",
       "strict": false

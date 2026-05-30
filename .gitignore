@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 feedback-log.md
+*.egg-info/
+dist/
+build/
+src/*.egg-info/
