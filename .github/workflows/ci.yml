@@ -103,7 +103,7 @@ jobs:
           PV=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
           MV=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
           TV=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
-          IV=$(python3 -c "import re; print(re.search(r'__version__\s*=\s*[\"']([^\"']+)', open('src/efc/__init__.py').read()).group(1))")
+          IV=$(python3 -c 'import ast; print(ast.literal_eval(open("src/efc/__init__.py").read().split("=")[1].strip())))'
           echo "plugin.json:      $PV"
           echo "marketplace.json: $MV"
           echo "pyproject.toml:   $TV"
