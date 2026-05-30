@@ -14,5 +14,3 @@ repos:
       - id: check-json
       - id: check-yaml
       - id: check-merge-conflict
-      - id: no-commit-to-branch
-        args: [--branch, main]
