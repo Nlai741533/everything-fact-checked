@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Nlai741533/everything-fact-checked/schemas/evidence.schema.json",
+  "title": "Fact-check evidence record",
+  "description": "One traceable verdict produced by the fact-check skill. A file may contain a single record or an array of records.",
+  "type": "object",
+  "required": ["claim_id", "claim_text", "priority", "verdict"],
+  "additionalProperties": false,
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^C[0-9]{3,}$",
+      "description": "Stable identifier, e.g. C001."
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The exact claim being checked."
+    },
+    "location": {
+      "type": "string",
+      "description": "Where the claim appears (page, section, line)."
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["P0", "P1", "P2", "P3"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Free-form claim category, e.g. financial_figure, percentage, date, event."
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["verified", "error", "unverifiable"]
+    },
+    "reported_value": {
+      "type": ["string", "number", "null"]
+    },
+    "source_value": {
+      "type": ["string", "number", "null"]
+    },
+    "source_url": {
+      "type": ["string", "null"],
+      "description": "Must resolve and contain source_value when verdict is 'verified'."
+    },
+    "source_tier": {
+      "type": ["string", "null"],
+      "enum": ["primary", "secondary", "tertiary", null]
+    },
+    "source_date": {
+      "type": ["string", "null"]
+    },
+    "method": {
+      "type": "string",
+      "description": "How the claim was checked."
+    },
+    "impact": {
+      "type": ["string", "null"],
+      "enum": ["high", "medium", "low", null]
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "factCheckRules": {
+    "description": "Cross-field rules enforced by validate_evidence.py beyond plain JSON Schema.",
+    "rules": [
+      "A 'verified' verdict requires a non-null source_url.",
+      "A 'verified' verdict on a P0 or P1 claim requires source_tier of 'primary' or 'secondary' (never 'tertiary' alone).",
+      "An 'error' verdict requires both reported_value and source_value.",
+      "An 'unverifiable' verdict requires a non-empty notes field explaining what was searched."
+    ]
+  }
+}

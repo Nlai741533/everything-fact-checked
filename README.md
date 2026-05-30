@@ -103,10 +103,15 @@ No third-party dependencies — standard library only. Tested on Python 3.11 (CI
 python3 scripts/extract_claims.py report.md
 python3 scripts/extract_claims.py report.md --json
 
-# Check that every source URL actually resolves
+# Check that every source URL actually resolves (GET fallback + categories)
 python3 scripts/check_links.py report.md
 python3 scripts/check_links.py report.md --no-network   # list URLs only
+
+# Validate evidence records against the standard schema
+python3 scripts/validate_evidence.py evidence.json
 ```
+
+Every verdict can be recorded in a machine-checkable [evidence format](schemas/evidence.schema.json); `validate_evidence.py` enforces the schema *and* the cross-field rules (e.g. a `verified` verdict must cite a resolving primary/secondary source). See [`examples/evidence-sample.json`](examples/evidence-sample.json).
 
 ## 🛠️ Build on it
 

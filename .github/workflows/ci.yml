@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,12 +17,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate JSON manifests
+      - name: Validate JSON manifests & schema
         run: |
           python3 -c "import json; json.load(open('.claude-plugin/plugin.json')); print('plugin.json OK')"
           python3 -c "import json; json.load(open('.claude-plugin/marketplace.json')); print('marketplace.json OK')"
+          python3 -c "import json; json.load(open('schemas/evidence.schema.json')); print('evidence.schema.json OK')"
 
-      - name: Check SKILL.md frontmatter exists
+      - name: Check SKILL.md frontmatter
         run: |
           test -f skills/fact-check/SKILL.md
           head -1 skills/fact-check/SKILL.md | grep -q '^---$' && echo "frontmatter OK"
@@ -30,7 +31,29 @@ jobs:
       - name: Run unit tests
         run: python3 -m unittest discover -s tests -v
 
-      - name: Smoke-test scripts
+      - name: Validate the evidence sample against the schema
+        run: python3 scripts/validate_evidence.py examples/evidence-sample.json
+
+      - name: Smoke-test scripts on the example report
         run: |
           python3 scripts/extract_claims.py examples/sample-report.md > /dev/null && echo "extract_claims OK"
           python3 scripts/check_links.py --no-network examples/sample-report.md > /dev/null && echo "check_links OK"
+
+  plugin-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin and marketplace with the real CLI
+        run: |
+          claude plugin validate .
+          claude plugin validate .claude-plugin/plugin.json
+          claude plugin validate .claude-plugin/marketplace.json

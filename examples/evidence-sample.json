@@ -1,0 +1,44 @@
+[
+  {
+    "claim_id": "C001",
+    "claim_text": "Acme Robotics reported revenue of $4,200B in FY2024",
+    "location": "Summary, line 9",
+    "priority": "P0",
+    "type": "financial_figure",
+    "verdict": "error",
+    "reported_value": "$4,200B",
+    "source_value": "$4.2B (per revenue table)",
+    "source_url": null,
+    "source_tier": "tertiary",
+    "source_date": null,
+    "method": "Internal inconsistency: summary says $4,200B, table says $4.2B; sanity check fails",
+    "impact": "high",
+    "notes": "Unit/scale error - 1000x inflation"
+  },
+  {
+    "claim_id": "C002",
+    "claim_text": "Margins improved year over year",
+    "location": "Summary",
+    "priority": "P2",
+    "type": "qualitative",
+    "verdict": "verified",
+    "source_url": "https://www.sec.gov/edgar",
+    "source_tier": "primary",
+    "source_date": "2025-04-15",
+    "method": "Confirmed in filing",
+    "impact": "low"
+  },
+  {
+    "claim_id": "C003",
+    "claim_text": "Acme entered Dubai Airport duty-free in 2024",
+    "location": "Expansion section",
+    "priority": "P1",
+    "type": "event",
+    "verdict": "unverifiable",
+    "source_url": null,
+    "source_tier": null,
+    "method": "Searched brand + 'Dubai Airport' in EN; no resolving source found",
+    "impact": "medium",
+    "notes": "Specific named location with zero corroborating sources; recommend removal"
+  }
+]
