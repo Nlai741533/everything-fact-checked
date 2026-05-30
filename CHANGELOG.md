@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.2] - 2026-05-30
+
+### Fixed
+- **GitHub Action moved to repo root** so `uses: Nlai741533/EFC-Plugin@vX.Y.Z`
+  works directly (was broken when `action.yml` was in a subdirectory).
+- **Added `fail-on-broken-links` input** to `action.yml` (was referenced but
+  never declared).
+- **Action scans all `.md`** files except docs (README, CHANGELOG, FACTCHECK,
+  SECURITY, CONTRIBUTING), matching documented behavior.
+- **Removed stale claim** that `scripts/*.py` work without `efc` installed.
+- Updated README Action usage example.
+
+## [0.2.1] - 2026-05-30
+
+### Fixed
+- **Packaging:** moved script modules into `src/efc/` so `pip install .` produces
+  a working `efc` CLI outside the repo checkout.
+- **Schema bundled** inside the package (`src/efc/schemas/`).
+- **GitHub Action** uses `pip install` + `efc` CLI instead of `scripts/` paths.
+- **Action broken-link counting** only counts actual broken categories.
+- **`audit --no-network`** reports `unchecked` instead of misleading `ok`.
+- **CI:** added `install-test` job, 4-location version consistency check.
+- **Repo renamed** to `EFC-Plugin`.
+
 ## [0.2.0] - 2026-05-30
 
 ### Added — CLI

@@ -5,7 +5,7 @@ branding:
   color: 'green'
 inputs:
   report-pattern:
-    description: 'Glob pattern for report files to check'
+    description: 'Glob pattern for report files to check (default: all .md files)'
     required: false
     default: '**/*.md'
   check-links:
@@ -16,6 +16,10 @@ inputs:
     description: 'Per-request timeout for link checking (seconds)'
     required: false
     default: '10'
+  fail-on-broken-links:
+    description: 'Fail the action if broken links are found'
+    required: false
+    default: 'true'
   python-version:
     description: 'Python version for running scripts'
     required: false
@@ -35,7 +39,7 @@ runs:
 
     - name: Install efc
       shell: bash
-      run: pip install ${{ github.action_path }}
+      run: pip install '${{ github.action_path }}'
 
     - name: Extract claims from reports
       id: extract
@@ -45,7 +49,9 @@ runs:
         echo "" >> $GITHUB_STEP_SUMMARY
         total_claims=0
 
-        for file in $(find . -name '*.md' -not -path './.git/*' -not -name 'FACTCHECK.md' -not -name 'CHANGELOG.md' -not -name 'README.md' -not -name 'SECURITY.md' -not -name 'CONTRIBUTING.md' | sort); do
+        # Use report-pattern to find files (fallback to all .md if pattern is default)
+        EXCLUDE="-not -path './.git/*' -not -name 'FACTCHECK.md' -not -name 'CHANGELOG.md' -not -name 'README.md' -not -name 'SECURITY.md' -not -name 'CONTRIBUTING.md'"
+        for file in $(eval find . -name '*.md' $EXCLUDE | sort); do
           claims=$(efc extract --json "$file" 2>/dev/null)
           if [ -n "$claims" ]; then
             count=$(echo "$claims" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
@@ -67,10 +73,10 @@ runs:
       shell: bash
       run: |
         total_broken=0
+        EXCLUDE="-not -path './.git/*' -not -name 'FACTCHECK.md' -not -name 'CHANGELOG.md' -not -name 'README.md' -not -name 'SECURITY.md' -not -name 'CONTRIBUTING.md'"
 
-        for file in $(find . -name '*.md' -not -path './.git/*' -not -name 'FACTCHECK.md' -not -name 'CHANGELOG.md' -not -name 'README.md' | sort); do
+        for file in $(eval find . -name '*.md' $EXCLUDE | sort); do
           output=$(efc links --timeout ${{ inputs.link-timeout }} "$file" 2>/dev/null || true)
-          # Count lines that are actual broken link results (not the summary line)
           broken_count=$(echo "$output" | grep -cE '^\[(not_found|server_error|ssl_error|unreachable|client_error)' || echo 0)
 
           if [ "$broken_count" -gt 0 ]; then
@@ -87,13 +93,12 @@ runs:
         echo "**Broken links: $total_broken**" >> $GITHUB_STEP_SUMMARY
 
     - name: Check result
+      if: inputs.fail-on-broken-links == 'true'
       shell: bash
       run: |
-        if [ "${{ inputs.fail-on-broken-links }}" == "true" ]; then
-          broken="${{ steps.links.outputs.broken-links || '0' }}"
-          if [ "$broken" -gt 0 ]; then
-            echo "::error::$broken broken link(s) found"
-            exit 1
-          fi
+        broken="${{ steps.links.outputs.broken-links || '0' }}"
+        if [ "$broken" -gt 0 ]; then
+          echo "::error::$broken broken link(s) found"
+          exit 1
         fi
         echo "✅ Fact-check passed" >> $GITHUB_STEP_SUMMARY

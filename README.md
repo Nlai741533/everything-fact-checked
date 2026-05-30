@@ -118,8 +118,6 @@ Exit codes: `0` = clean, `1` = problems found, `2` = usage/IO error.
 
 No third-party dependencies — standard library only. Tested on Python 3.11–3.13.
 
-The original `scripts/*.py` files still work for direct use, but `efc` is the recommended interface.
-
 Every verdict can be recorded in a machine-checkable [evidence format](schemas/evidence.schema.json); `efc evidence` enforces the schema *and* the cross-field rules (e.g. a `verified` verdict must cite a well-formed http/https URL and, for P0/P1 claims, a primary or secondary source). See [`examples/evidence-sample.json`](examples/evidence-sample.json).
 
 ## Source-content verification
@@ -139,13 +137,14 @@ Verdicts: `found` ✅ | `not_found` ❌ | `ambiguous` ⚠️ | `skipped` ⏭️ 
 Fact-check markdown reports automatically in PRs:
 
 ```yaml
-- uses: Nlai741533/EFC-Plugin@v0.2.1
+- uses: Nlai741533/EFC-Plugin@v0.2.2
   with:
     check-links: 'true'
     fail-on-broken-links: 'true'
+    link-timeout: '10'
 ```
 
-The action extracts claims from changed `.md` files, checks source links, and posts results to the PR summary.
+The action extracts claims from `.md` files (excluding docs like README, CHANGELOG, FACTCHECK), checks source links, and posts results to the PR summary.
 
 ## 🛠️ Build on it
 

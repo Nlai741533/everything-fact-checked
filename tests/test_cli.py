@@ -24,7 +24,7 @@ class VersionTest(unittest.TestCase):
         finally:
             sys.stdout = old
         self.assertEqual(rc, 0)
-        self.assertIn("0.2.1", buf.getvalue())
+        self.assertIn("0.2.2", buf.getvalue())
 
 
 class ExtractTest(unittest.TestCase):

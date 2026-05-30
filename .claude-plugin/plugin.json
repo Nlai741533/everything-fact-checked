@@ -1,6 +1,6 @@
 {
   "name": "fact-check",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Systematically fact-check AI-generated research reports against primary sources. Catches the five recurring failure modes of LLM research: unit/scale errors, fabricated interpolation, source conflation, stale data, and attribution laundering.",
   "author": {
     "name": "Nlai741533",
