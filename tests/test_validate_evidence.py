@@ -66,6 +66,24 @@ class RuleTest(unittest.TestCase):
             f"Expected URL-format error, got: {errs_list}",
         )
 
+    def test_verified_rejects_url_without_host(self):
+        rec = copy.deepcopy(VALID)
+        rec["source_url"] = "https:///missing-host"
+        errs_list = errs(rec)
+        self.assertTrue(
+            any("does not look like a URL" in e for e in errs_list),
+            f"Expected URL-format error for missing host, got: {errs_list}",
+        )
+
+    def test_verified_rejects_ftp_url(self):
+        rec = copy.deepcopy(VALID)
+        rec["source_url"] = "ftp://files.example.com/data.csv"
+        errs_list = errs(rec)
+        self.assertTrue(
+            any("does not look like a URL" in e for e in errs_list),
+            f"Expected URL-format error for ftp scheme, got: {errs_list}",
+        )
+
     def test_verified_accepts_valid_http_url(self):
         rec = copy.deepcopy(VALID)
         rec["source_url"] = "http://sec.gov/filing"

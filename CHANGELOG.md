@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.2] - 2026-05-30
+
+### Fixed
+- **URL validation hardened:** replaced regex `^https?://\S+$` with
+  `urllib.parse.urlparse()` — now requires `scheme in {"http", "https"}`
+  and non-empty `netloc`. Rejects `https:///missing-host`, `ftp://...`, etc.
+- **Docstring alignment:** validator module docstring no longer claims
+  "resolving" sources — accurately describes format + tier checks.
+- **FACTCHECK.md:** live link results now labeled as environment/date-specific;
+  test count updated.
+- Added 2 new tests (URL-without-host, ftp scheme rejected).
+
 ## [0.1.1] - 2026-05-30
 
 ### Fixed

@@ -4,7 +4,8 @@
 Makes the skill's "standard evidence format" mechanically enforceable: it checks
 the JSON Schema constraints (required fields, types, enums, no stray fields) plus
 the cross-field fact-check rules that plain JSON Schema can't express (e.g. a
-"verified" verdict must cite a resolving primary/secondary source).
+"verified" verdict must cite a well-formed http/https source_url, and P0/P1
+claims require a primary or secondary source_tier).
 
 Stdlib only — implements the small subset of JSON Schema this project uses, so
 there is no third-party dependency.
@@ -20,17 +21,19 @@ import json
 import os
 import re
 import sys
+from urllib.parse import urlparse
 
 DEFAULT_SCHEMA = os.path.join(
     os.path.dirname(__file__), "..", "schemas", "evidence.schema.json"
 )
 
-_URL_RE = re.compile(r"^https?://\S+$", re.IGNORECASE)
-
-
 def _looks_like_url(value: str) -> bool:
-    """Conservative URL plausibility check (http/https scheme + non-empty host)."""
-    return bool(_URL_RE.match(value.strip()))
+    """Check that value is a plausible http/https URL with a non-empty host."""
+    try:
+        parsed = urlparse(value.strip())
+        return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    except Exception:
+        return False
 
 
 _JSON_TYPES = {
