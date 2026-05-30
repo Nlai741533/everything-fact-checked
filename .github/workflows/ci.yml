@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate JSON manifests
+        run: |
+          python3 -c "import json; json.load(open('.claude-plugin/plugin.json')); print('plugin.json OK')"
+          python3 -c "import json; json.load(open('.claude-plugin/marketplace.json')); print('marketplace.json OK')"
+
+      - name: Check SKILL.md frontmatter exists
+        run: |
+          test -f skills/fact-check/SKILL.md
+          head -1 skills/fact-check/SKILL.md | grep -q '^---$' && echo "frontmatter OK"
+
+      - name: Run unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Smoke-test scripts
+        run: |
+          python3 scripts/extract_claims.py examples/sample-report.md > /dev/null && echo "extract_claims OK"
+          python3 scripts/check_links.py --no-network examples/sample-report.md > /dev/null && echo "check_links OK"

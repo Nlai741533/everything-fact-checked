@@ -1,89 +1,113 @@
 # everything-fact-checked
 
-A skill for Claude Code that systematically fact-checks AI-generated reports — catching hallucinated numbers, fabricated data points, and exaggerated claims before they ship.
+A Claude Code plugin that systematically fact-checks AI-generated reports — catching hallucinated numbers, fabricated data points, and exaggerated claims before they ship.
+
+[![CI](https://github.com/Nlai741533/everything-fact-checked/actions/workflows/ci.yml/badge.svg)](https://github.com/Nlai741533/everything-fact-checked/actions/workflows/ci.yml)
 
 ## The problem
 
 LLM agents are increasingly used to produce research reports, market analyses, and data-heavy documents. These reports *look* authoritative but contain predictable failure modes that are hard to catch by reading alone:
 
-- **Unit errors** — a $5.3B figure that should be $530M because a unit conversion was dropped
+- **Unit / scale errors** — a $5.3B figure that should be $530M because a unit conversion was dropped
 - **Fabricated interpolation** — a chart shows 6 data points but only 2 were actually found; the rest were silently made up
 - **Source conflation** — "trade volume" cited as "exports," or "GMV" reported as "revenue"
 - **Stale data as current** — 2023 figures presented as 2025 actuals
 - **Attribution laundering** — a media blog cited as if it were a regulatory filing
 
-These aren't random errors. They're systematic patterns that emerge whenever an LLM does web research at scale. This skill gives your agent a structured protocol to catch them.
+These aren't random errors. They're systematic patterns that emerge whenever an LLM does web research at scale. This plugin gives your agent a structured protocol to catch them — plus small scripts that mechanise the tedious first steps.
+
+## What this is (and isn't)
+
+- ✅ **A disciplined operating procedure** for an agent (or person) doing verification: triage, primary-source preference, chart/table tracing, marketing-claim labeling, and a standard evidence format.
+- ✅ **Helper scripts** that extract claims and check links so nothing goes unreviewed.
+- ❌ **Not** a push-button oracle. Verification of whether a source actually supports a claim is a judgment task; the agent still has to open primary sources. The scripts find *what to check*, not *whether it's true*.
 
 ## Install
 
-```bash
-claude skill add --url https://github.com/Nlai741533/everything-fact-checked
+This is a standard Claude Code plugin. Add the repo as a marketplace, then install:
+
 ```
+/plugin marketplace add Nlai741533/everything-fact-checked
+/plugin install fact-check@everything-fact-checked
+```
+
+Or try it for a single session without installing:
+
+```bash
+claude --plugin-url https://github.com/Nlai741533/everything-fact-checked
+```
+
+For local development on a clone:
+
+```bash
+claude --plugin-dir /path/to/everything-fact-checked
+```
+
+> Requires Claude Code with plugin support (tested on 2.1.x). There is no
+> `claude skill add` command — use the plugin commands above.
 
 ## Usage
 
-After installing, simply ask Claude Code to fact-check any document:
+Once installed, ask Claude Code to fact-check any document:
 
 ```
 fact-check this report
-```
-```
 verify the numbers in the market analysis
-```
-```
 audit the data in this deliverable
 ```
 
-The skill automatically triggers when it detects fact-checking intent and runs a structured 6-step workflow:
+The skill runs a structured 6-step workflow: inventory claims → triage by risk (P0–P3) → verify P0/P1 against primary sources → cross-check charts/tables → audit the source list → produce a report. Every verdict is backed by a record in a [standard evidence format](skills/fact-check/SKILL.md#standard-evidence-format).
 
-1. **Inventory** all specific claims (financial figures, market data, factual statements)
-2. **Triage** by risk (P0 critical through P3 low)
-3. **Verify** P0/P1 claims against primary sources
-4. **Cross-check** charts and tables for internal consistency
-5. **Audit** the source list for broken links and attribution accuracy
-6. **Report** findings in a structured format with clear verdicts
+It also treats all source content as **untrusted data**, not instructions — so a document can't talk the fact-checker into marking itself "verified."
 
-## What it catches
+## Helper scripts
 
-### Quantitative errors
-- Numbers with wrong units or scale (the #1 source of errors in cross-language research)
-- Interpolated data points presented as real (smooth trend lines are a red flag)
-- Growth rates that don't match the absolute figures
-- Currency conversions without stated rates
+Dependency-free (Python 3.8+ stdlib). Run them directly on a report:
 
-### Qualitative fabrication
-- **Entity contagion** — one company did X, so the agent says three companies did X
-- **Channel conflation** — entered retailer A, reported as entering retailer B (more prestigious)
-- **Status inflation** — "plans to launch" becomes "has launched"
-- Superlatives ("first," "only," "largest") without verification
+```bash
+# Inventory every checkable claim with a priority guess
+python3 scripts/extract_claims.py report.md
+python3 scripts/extract_claims.py report.md --json
 
-### Source problems
-- Secondary sources cited as primary
-- URLs that don't resolve or don't contain the attributed information
-- Marketing claims reported as verified facts
-- Stale data presented without vintage dates
+# Check that every source URL actually resolves
+python3 scripts/check_links.py report.md
+python3 scripts/check_links.py report.md --no-network   # list URLs only
+```
 
-## Output
+## Example
 
-The skill produces a structured fact-check report:
+[`examples/sample-report.md`](examples/sample-report.md) is a deliberately flawed (fictional) report containing one of each failure mode plus broken links. [`examples/expected-fact-check.md`](examples/expected-fact-check.md) shows the kind of output the skill should produce on it.
 
-| Section | What it contains |
-|---|---|
-| **Verified** | Claims confirmed against primary sources |
-| **Errors Found** | Discrepancies with reported vs. actual values and impact rating |
-| **Unverifiable** | Claims that couldn't be confirmed, with recommendations (flag, remove, or hedge) |
-| **Summary** | Claim counts, error counts, and overall reliability rating |
+## Development
 
-## When NOT to use this
+```bash
+python3 -m unittest discover -s tests -v
+```
 
-- Code review (use a code review tool)
-- General editing or proofreading
-- Single factual questions (just ask directly)
+CI runs the test suite, validates the plugin/marketplace manifests, and smoke-tests the scripts on every push.
 
-## Why this exists
+## Repository layout
 
-This skill was built from real experience fact-checking AI-generated research reports at scale. Every rule in it exists because an AI agent made that exact mistake in production — and the mistake was only caught after manual review. The goal is to make that manual review systematic and teachable to another AI agent.
+```
+.claude-plugin/
+  plugin.json          # plugin manifest
+  marketplace.json     # lets the repo be added as a marketplace
+skills/fact-check/
+  SKILL.md             # the fact-check operating procedure
+scripts/
+  extract_claims.py    # claim inventory extractor
+  check_links.py       # source-link checker
+examples/              # sample flawed report + expected output
+tests/                 # unit tests + fixtures
+.github/workflows/     # CI
+```
+
+## Limitations
+
+- The scripts use heuristics; they will miss claims phrased in words ("one million") and may surface borderline matches. They are a triage aid, not a guarantee.
+- Link checking confirms a URL resolves, not that the page contains the attributed claim.
+- The skill's quality depends on the agent following it and having access to primary sources (web/search tools).
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
