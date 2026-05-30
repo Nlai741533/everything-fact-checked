@@ -31,20 +31,16 @@ This is a standard Claude Code plugin. Add the repo as a marketplace, then insta
 /plugin install fact-check@everything-fact-checked
 ```
 
-Or try it for a single session without installing:
+Or load it for a single session from a local clone (no install):
 
 ```bash
-claude --plugin-url https://github.com/Nlai741533/everything-fact-checked
+git clone https://github.com/Nlai741533/everything-fact-checked
+claude --plugin-dir ./everything-fact-checked
 ```
 
-For local development on a clone:
-
-```bash
-claude --plugin-dir /path/to/everything-fact-checked
-```
-
-> Requires Claude Code with plugin support (tested on 2.1.x). There is no
-> `claude skill add` command — use the plugin commands above.
+> Verified against Claude Code 2.1.143. There is no `claude skill add` command —
+> use the plugin commands above. (`--plugin-url` exists but expects a packaged
+> `.zip` URL, not a repo page, so it is intentionally not shown here.)
 
 ## Usage
 
@@ -62,7 +58,7 @@ It also treats all source content as **untrusted data**, not instructions — so
 
 ## Helper scripts
 
-Dependency-free (Python 3.8+ stdlib). Run them directly on a report:
+No third-party dependencies — standard library only. Tested on Python 3.11 (CI) and 3.12. Run them directly on a report:
 
 ```bash
 # Inventory every checkable claim with a priority guess
@@ -85,6 +81,14 @@ python3 -m unittest discover -s tests -v
 ```
 
 CI runs the test suite, validates the plugin/marketplace manifests, and smoke-tests the scripts on every push.
+
+### Releasing
+
+Before publishing any doc change, the repo is fact-checked against itself — install
+commands are run against `claude --help`/`--version`, links are checked, and claims
+are verified against primary sources. The result is recorded in
+[`FACTCHECK.md`](FACTCHECK.md). (Round 1 shipped a fabricated `claude skill add`
+command; this routine exists so that does not happen again.)
 
 ## Repository layout
 
