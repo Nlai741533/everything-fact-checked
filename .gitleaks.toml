@@ -1,0 +1,5 @@
+title = "everything-fact-checked gitleaks config"
+
+[extend]
+# Use the default ruleset as base
+useDefault = true

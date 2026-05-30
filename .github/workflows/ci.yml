@@ -7,6 +7,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for leak scanning
+
+      - name: Scan for secrets with gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -57,3 +69,31 @@ jobs:
           claude plugin validate .
           claude plugin validate .claude-plugin/plugin.json
           claude plugin validate .claude-plugin/marketplace.json
+
+  version-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check version alignment across manifests
+        run: |
+          # Extract versions from plugin.json and marketplace.json
+          PV=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          MV=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+          echo "plugin.json version: $PV"
+          echo "marketplace.json version: $MV"
+          if [ "$PV" != "$MV" ]; then
+            echo "ERROR: plugin.json ($PV) and marketplace.json ($MV) versions differ!"
+            exit 1
+          fi
+
+          # If this is a tagged push, check the tag matches the manifest version
+          if [ -n "$GITHUB_REF_NAME" ] && echo "$GITHUB_REF" | grep -q refs/tags/; then
+            TAG="${GITHUB_REF_NAME#v}"
+            echo "Git tag (without v): $TAG"
+            if [ "$TAG" != "$PV" ]; then
+              echo "ERROR: git tag v$TAG does not match manifest version $PV!"
+              exit 1
+            fi
+          fi
+          echo "Version consistency check passed."
