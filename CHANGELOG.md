@@ -7,8 +7,8 @@ All notable changes to this project are documented here.
 ### Added
 - Packaged as a proper Claude Code plugin: `.claude-plugin/plugin.json` and
   `.claude-plugin/marketplace.json`; skill moved to `skills/fact-check/SKILL.md`.
-- Verified install path (`/plugin marketplace add` + `/plugin install`,
-  `--plugin-url`, `--plugin-dir`).
+- Verified install path: `/plugin marketplace add` + `/plugin install`, with
+  `--plugin-dir` for loading a local clone (checked against `claude --help`).
 - `scripts/extract_claims.py` — claim inventory extractor with priority triage.
 - `scripts/check_links.py` — source-link resolver/checker.
 - `examples/` — deliberately flawed fictional report plus expected fact-check output.
