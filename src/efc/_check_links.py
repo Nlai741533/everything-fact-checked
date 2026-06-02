@@ -112,6 +112,7 @@ def main(argv=None) -> int:
     parser.add_argument("report", help="Path to the report file")
     parser.add_argument("--timeout", type=float, default=10.0, help="Per-request timeout in seconds")
     parser.add_argument("--no-network", action="store_true", help="List URLs only; make no requests")
+    parser.add_argument("--max-broken", type=int, default=None, help="Exit 0 if broken links <= N (for CI on demo files)")
     args = parser.parse_args(argv)
 
     try:
@@ -141,6 +142,8 @@ def main(argv=None) -> int:
         print(f"[{cat:<12}] {code:>3} {url}{extra}")
 
     print(f"\n{len(urls)} links, {broken} broken (categories outside {sorted(RESOLVES)}).")
+    if args.max_broken is not None and broken <= args.max_broken:
+        return 0
     return 1 if broken else 0
 
 

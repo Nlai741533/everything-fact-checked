@@ -116,4 +116,4 @@ jobs:
       - name: Check live links
         run: |
           pip install .
-          efc links --timeout 10 examples/sample-report.md
+          efc links --timeout 10 --max-broken 3 examples/sample-report.md

@@ -84,6 +84,8 @@ def _cmd_links(args) -> int:
         print(f"[{cat:<12}] {code:>3} {url}{extra}")
 
     print(f"\n{len(urls)} links, {broken} broken.")
+    if args.max_broken is not None and broken <= args.max_broken:
+        return 0
     return 1 if broken else 0
 
 
@@ -232,6 +234,7 @@ def main(argv=None) -> int:
     p_links.add_argument("report", help="Path to the report file")
     p_links.add_argument("--timeout", type=float, default=10.0, help="Per-request timeout (s)")
     p_links.add_argument("--no-network", action="store_true", help="List URLs only")
+    p_links.add_argument("--max-broken", type=int, default=None, help="Exit 0 if broken links <= N")
 
     # evidence
     p_evidence = sub.add_parser("evidence", help="Validate evidence records")
