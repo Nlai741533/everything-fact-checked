@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Changed
+- **Docs polish (no code change):**
+  - Moved `promo/` to `docs/promo/` so the repository root reads as a clean
+    engineering project. No code or config referenced the old path.
+  - README: added a "why three names?" note clarifying the
+    repo (`EFC-Plugin`) / marketplace+package (`everything-fact-checked`) /
+    plugin (`fact-check`) naming.
+  - README: framed `efc verify`'s `found` verdict as "necessary, not sufficient"
+    (a term-overlap heuristic, not a truth verdict).
+
 ## [0.2.3] - 2026-06-03
 
 ### Fixed

@@ -56,6 +56,21 @@ It's a standard Claude Code plugin — two lines to install:
 /plugin install fact-check@everything-fact-checked
 ```
 
+<details>
+<summary>Wait, why three different names?</summary>
+
+This project wears three hats, so it answers to three names:
+
+| Name | What it is | Where you see it |
+|---|---|---|
+| **`EFC-Plugin`** | the GitHub **repository** | clone URL, `marketplace add` |
+| **`everything-fact-checked`** | the **marketplace** + the PyPI package | `install …@everything-fact-checked`, `pip install` |
+| **`fact-check`** | the **plugin/skill** itself | `install fact-check@…`, the `/fact-check` prompt |
+
+So `/plugin install fact-check@everything-fact-checked` reads as "install the
+**fact-check** plugin from the **everything-fact-checked** marketplace."
+</details>
+
 Or kick the tires for a single session, no install:
 
 ```bash
@@ -131,6 +146,13 @@ efc verify --json evidence.json                # JSON output
 ```
 
 Verdicts: `found` ✅ | `not_found` ❌ | `ambiguous` ⚠️ | `skipped` ⏭️ | `fetch_failed` 🔌
+
+> **`found` is necessary, not sufficient.** This is a term-overlap heuristic: a
+> `found` means the page contains the claim's key terms (numbers, years, names),
+> *not* that the page actually supports the claim. A long article can contain
+> "$4.2B" and "2024" in unrelated sentences. Treat `found` as "worth a human
+> read," `not_found`/`ambiguous` as "investigate or flag" — never as a final
+> verdict on truth.
 
 ## GitHub Action
 
