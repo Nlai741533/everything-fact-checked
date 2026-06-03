@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "everything-fact-checked"
-version = "0.2.3"
+version = "0.2.4"
 description = "Fact-check AI-generated research reports — catch hallucinated numbers, fabricated data, and exaggerated claims"
 readme = "README.md"
 license = "MIT"

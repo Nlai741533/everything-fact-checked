@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+## [0.2.4] - 2026-06-03
 
 ### Changed
 - **Docs polish (no code change):**
