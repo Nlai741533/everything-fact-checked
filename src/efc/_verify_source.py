@@ -26,9 +26,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import re
+import socket
 import sys
 import urllib.error
 import urllib.request
@@ -36,6 +38,59 @@ from html.parser import HTMLParser
 from urllib.parse import urlparse
 
 _USER_AGENT = "fact-check-source-verify/0.1 (+https://github.com/Nlai741533/EFC-Plugin)"
+
+# SSRF guard: `verify` fetches URLs that may come from untrusted reports/PRs.
+# Refuse non-web schemes and any host that resolves to a private, loopback,
+# link-local (incl. cloud metadata 169.254.169.254), or otherwise reserved IP.
+_ALLOWED_SCHEMES = ("http", "https")
+
+
+def _ip_is_blocked(ip_str: str) -> bool:
+    """True if an IP is loopback/private/link-local/reserved (not publicly routable)."""
+    try:
+        ip = ipaddress.ip_address(ip_str)
+    except ValueError:
+        return True  # unparseable -> refuse
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    )
+
+
+def is_safe_url(url: str) -> tuple[bool, str]:
+    """Return (ok, reason). Refuses non-http(s) schemes and hosts that resolve
+    to non-public IPs. Pure-ish: performs DNS resolution but no HTTP request."""
+    parsed = urlparse(url)
+    if parsed.scheme not in _ALLOWED_SCHEMES:
+        return False, f"scheme '{parsed.scheme}' not allowed (http/https only)"
+    host = parsed.hostname
+    if not host:
+        return False, "missing host"
+    # A literal IP in the URL bypasses DNS; check it directly too.
+    try:
+        infos = socket.getaddrinfo(host, parsed.port or None, proto=socket.IPPROTO_TCP)
+    except socket.gaierror as exc:
+        return False, f"DNS resolution failed: {exc}"
+    for info in infos:
+        ip_str = info[4][0]
+        if _ip_is_blocked(ip_str):
+            return False, f"host resolves to blocked address {ip_str}"
+    return True, "ok"
+
+
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Re-validate each redirect target so a public URL can't bounce to an
+    internal one."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        ok, reason = is_safe_url(newurl)
+        if not ok:
+            raise urllib.error.URLError(f"blocked redirect to {newurl}: {reason}")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 class _TextExtractor(HTMLParser):
@@ -81,9 +136,14 @@ def fetch_page(url: str, timeout: float = 10.0) -> tuple:
     Returns (visible_text, http_status, error_message).
     text is None if fetch failed.
     """
+    ok, reason = is_safe_url(url)
+    if not ok:
+        return None, None, f"blocked by SSRF guard: {reason}"
+
     req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
+    opener = urllib.request.build_opener(_SafeRedirectHandler)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with opener.open(req, timeout=timeout) as resp:
             raw = resp.read().decode("utf-8", errors="replace")
             text = _strip_html(raw)
             return text, resp.status, None

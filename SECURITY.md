@@ -26,6 +26,23 @@ If you accidentally commit a secret:
 2. Do NOT just delete it from the file; it remains in git history
 3. Use `git filter-repo` or BFG Repo Cleaner to purge it from history, or contact a maintainer
 
+## Network safety (SSRF guard)
+
+`efc verify` fetches the source URLs found in evidence records, and those URLs
+may come from untrusted reports or pull requests. To prevent server-side request
+forgery (SSRF), `efc verify`:
+
+- accepts only `http`/`https` schemes (no `file://`, `gopher://`, etc.);
+- resolves each host and **refuses any URL that resolves to a non-public
+  address** — loopback, private, link-local (including the cloud metadata
+  endpoint `169.254.169.254`), reserved, multicast, or unspecified IPs;
+- re-validates the target of every HTTP redirect, so a public URL cannot bounce
+  to an internal one.
+
+This still relies on standard-library `urllib`; it is defense against accidental
+and opportunistic SSRF, not a substitute for running untrusted checks in a
+network-isolated sandbox when the threat model warrants it.
+
 ## Scope
 
 This policy covers the EFC-Plugin repository. It does not cover:

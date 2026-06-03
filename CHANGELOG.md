@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented here.
 
+## [0.2.3] - 2026-06-03
+
+### Fixed
+- **`efc audit --json` now returns the correct exit code.** Broken links set a
+  non-zero exit in *both* human and `--json` modes (previously `--json` returned
+  `0` on a failing report, silently passing in CI). Added an exit-code parity
+  regression test.
+- **CONTRIBUTING.md** no longer claims `scripts/*.py` run without installing
+  `efc`; the scripts are thin shims around the `efc` package, so `pip install -e .`
+  is required. Updated the good-first-issue file paths to `src/efc/`.
+
+### Security
+- **SSRF guard for `efc verify`.** Source URLs (which may come from untrusted
+  reports/PRs) are now restricted to `http`/`https` and refused if the host
+  resolves to a loopback, private, link-local (incl. cloud metadata
+  `169.254.169.254`), reserved, multicast, or unspecified address. HTTP
+  redirects are re-validated against the same rules. Documented in SECURITY.md;
+  covered by new tests.
+
 ## [0.2.2] - 2026-05-30
 
 ### Fixed

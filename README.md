@@ -137,7 +137,7 @@ Verdicts: `found` ✅ | `not_found` ❌ | `ambiguous` ⚠️ | `skipped` ⏭️ 
 Fact-check markdown reports automatically in PRs:
 
 ```yaml
-- uses: Nlai741533/EFC-Plugin@v0.2.2
+- uses: Nlai741533/EFC-Plugin@v0.2.3
   with:
     check-links: 'true'
     fail-on-broken-links: 'true'

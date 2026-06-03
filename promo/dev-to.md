@@ -113,7 +113,7 @@ efc verify evidence.json
 ### GitHub Action
 Auto fact-check markdown reports in every PR:
 ```yaml
-- uses: Nlai741533/EFC-Plugin@v0.2.2
+- uses: Nlai741533/EFC-Plugin@v0.2.3
 ```
 
 ### Standalone SKILL.md (for any AI agent)

@@ -26,7 +26,9 @@ python3 -m unittest discover -s tests -v
 
 ## Code Style
 
-- **Python scripts** (`scripts/`): stdlib only. No `pip install` required.
+- **Source** (`src/efc/`): stdlib only, no third-party runtime dependencies. The
+  `scripts/*.py` files are thin shims that import from the installed `efc`
+  package, so run `pip install -e .` before invoking them directly.
 - **Tests** (`tests/`): stdlib `unittest`. No pytest, no fixtures library.
 - **Skill** (`skills/fact-check/SKILL.md`): pure Markdown.
 - **Schemas** (`schemas/`): JSON Schema draft-07.
@@ -35,10 +37,10 @@ python3 -m unittest discover -s tests -v
 
 Good first issues:
 
-- Add a new claim type to `extract_claims.py` (e.g., named entities, quotes, "according to" attribution) with matching tests
+- Add a new claim type to `src/efc/_extract_claims.py` (e.g., named entities, quotes, "according to" attribution) with matching tests
 - Add a fixture for a failure mode that isn't covered yet
 - Add a new example report (flawed policy brief, startup memo, etc.)
-- Improve URL extraction edge cases in `check_links.py`
+- Improve URL extraction edge cases in `src/efc/_check_links.py`
 
 ## Commit Messages
 

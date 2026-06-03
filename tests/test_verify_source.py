@@ -94,6 +94,49 @@ class VerifyRecordsTest(unittest.TestCase):
         self.assertEqual(results[0]["claim_id"], "C001")
 
 
+class SsrfGuardTest(unittest.TestCase):
+    def test_blocks_non_http_scheme(self):
+        ok, reason = vs.is_safe_url("file:///etc/passwd")
+        self.assertFalse(ok)
+        self.assertIn("scheme", reason)
+
+    def test_blocks_loopback(self):
+        ok, _ = vs.is_safe_url("http://127.0.0.1/admin")
+        self.assertFalse(ok)
+
+    def test_blocks_localhost(self):
+        ok, _ = vs.is_safe_url("http://localhost:8080/")
+        self.assertFalse(ok)
+
+    def test_blocks_cloud_metadata_ip(self):
+        ok, reason = vs.is_safe_url("http://169.254.169.254/latest/meta-data/")
+        self.assertFalse(ok)
+        self.assertIn("blocked address", reason)
+
+    def test_blocks_private_ip(self):
+        ok, _ = vs.is_safe_url("http://10.0.0.5/")
+        self.assertFalse(ok)
+        ok2, _ = vs.is_safe_url("http://192.168.1.1/")
+        self.assertFalse(ok2)
+
+    def test_allows_public_host(self):
+        ok, reason = vs.is_safe_url("https://example.com/page")
+        self.assertTrue(ok, reason)
+
+    def test_ip_blocklist_helper(self):
+        self.assertTrue(vs._ip_is_blocked("127.0.0.1"))
+        self.assertTrue(vs._ip_is_blocked("169.254.169.254"))
+        self.assertTrue(vs._ip_is_blocked("::1"))
+        self.assertTrue(vs._ip_is_blocked("garbage"))
+        self.assertFalse(vs._ip_is_blocked("93.184.216.34"))  # example.com
+
+    def test_fetch_page_refuses_blocked_url_without_network(self):
+        text, status, error = vs.fetch_page("http://127.0.0.1/secret")
+        self.assertIsNone(text)
+        self.assertIsNone(status)
+        self.assertIn("SSRF guard", error)
+
+
 class FormatTest(unittest.TestCase):
     def test_human_readable_output(self):
         results = [{"claim_id": "C001", "source_url": None, "verification": {"verdict": "skipped", "details": "No source URL"}}]

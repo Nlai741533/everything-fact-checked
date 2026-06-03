@@ -24,7 +24,7 @@ class VersionTest(unittest.TestCase):
         finally:
             sys.stdout = old
         self.assertEqual(rc, 0)
-        self.assertIn("0.2.2", buf.getvalue())
+        self.assertIn("0.2.3", buf.getvalue())
 
 
 class ExtractTest(unittest.TestCase):
@@ -94,6 +94,25 @@ class AuditTest(unittest.TestCase):
         data = json.loads(buf.getvalue())
         self.assertEqual(data["claims"]["total"], 18)
         self.assertTrue(data["links"]["unchecked"] > 0)
+
+    def test_audit_exit_code_parity_on_broken_links(self):
+        """Human and --json modes must return the SAME exit code (regression:
+        --json used to return 0 while human mode returned 1 on broken links)."""
+        import io
+        from efc import _check_links as cl
+
+        original = cl.check_url
+        cl.check_url = lambda url, timeout=10.0: (404, "not_found", "stubbed")
+        try:
+            for extra in ([], ["--json"]):
+                sys.stdout, old = io.StringIO(), sys.stdout
+                try:
+                    rc = cli_main(["audit", *extra, SAMPLE_REPORT])
+                finally:
+                    sys.stdout = old
+                self.assertEqual(rc, 1, f"audit {extra} should exit 1 on broken links")
+        finally:
+            cl.check_url = original
 
 
 class NoCommandTest(unittest.TestCase):

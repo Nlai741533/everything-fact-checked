@@ -26,7 +26,7 @@ And 3 interface types:
 |---|---|
 | CLI (`efc`) | `pip install everything-fact-checked` |
 | SKILL.md (any agent) | [EFC-standalone](https://github.com/Nlai741533/EFC-standalone) |
-| GitHub Action | `uses: Nlai741533/EFC-Plugin@v0.2.2` |
+| GitHub Action | `uses: Nlai741533/EFC-Plugin@v0.2.3` |
 
 ## Usage
 

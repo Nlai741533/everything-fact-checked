@@ -151,6 +151,10 @@ def _cmd_audit(args) -> int:
     elif urls:
         unchecked_urls = len(urls)
 
+    # Broken links are a failure in any output mode (so --json works in CI too).
+    if broken_urls:
+        exit_code = 1
+
     # JSON mode: pure JSON output
     if args.json:
         result = {
@@ -181,7 +185,6 @@ def _cmd_audit(args) -> int:
         for url, status, cat in broken_urls:
             code = str(status) if status is not None else "ERR"
             print(f"  ❌ [{cat}] {code} {url}")
-        exit_code = 1
 
     print(f"\nReliability: {'Low' if broken_urls or p0 > 0 else 'Medium' if p1 > 0 else 'High'}")
 
